@@ -1,6 +1,6 @@
 # Sliding Puzzle !
 
-Created by FreeDay.ai, written by @mehrismore
+Requested by [FreeDay](https://www.freeday.ai/), written by @mehrismore
 
 ## React + TypeScript + Vite
 
