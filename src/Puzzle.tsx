@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 const GRID_SIZE = 3;
 const BLOCK_COUNT = GRID_SIZE * GRID_SIZE;
@@ -37,11 +37,68 @@ const Puzzle: React.FC = () => {
   const [blocks, setBlocks] = useState<number[]>(() => generateShuffledBoard());
   const [moves, setMoves] = useState(0);
   const emptyIndex = blocks.indexOf(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const isSolved = useMemo(
     () => blocks.every((value, index) => value === SOLVED_BOARD[index]),
     [blocks]
   );
+
+  const playPlacementSound = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const AudioContextClass =
+      window.AudioContext ||
+      (
+        window as typeof window & {
+          webkitAudioContext?: typeof AudioContext;
+        }
+      ).webkitAudioContext;
+
+    if (!AudioContextClass) return;
+
+    if (!audioContextRef.current) {
+      try {
+        audioContextRef.current = new AudioContextClass();
+      } catch {
+        return;
+      }
+    }
+
+    const context = audioContextRef.current;
+    if (!context) return;
+    const playTone = (ctx: AudioContext) => {
+      const duration = 0.18;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+
+      gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime + duration
+      );
+
+      oscillator.connect(gainNode).connect(ctx.destination);
+
+      const startTime = ctx.currentTime + 0.02;
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+
+    if (context.state === "suspended") {
+      context
+        .resume()
+        .then(() => playTone(context))
+        .catch(() => {});
+      return;
+    }
+
+    playTone(context);
+  }, []);
 
   const canSlideBlock = (index: number) =>
     getNeighborIndices(emptyIndex).includes(index);
@@ -49,15 +106,27 @@ const Puzzle: React.FC = () => {
   const handleBlockClick = (index: number) => {
     if (!canSlideBlock(index)) return;
 
-    setBlocks((previousBlocks) => {
-      const nextBoard = [...previousBlocks];
-      const currentEmptyIndex = previousBlocks.indexOf(0);
-      [nextBoard[currentEmptyIndex], nextBoard[index]] = [
-        nextBoard[index],
-        nextBoard[currentEmptyIndex],
-      ];
-      return nextBoard;
+    const previousBlocks = blocks;
+    const nextBoard = [...previousBlocks];
+    const currentEmptyIndex = emptyIndex;
+
+    [nextBoard[currentEmptyIndex], nextBoard[index]] = [
+      nextBoard[index],
+      nextBoard[currentEmptyIndex],
+    ];
+
+    const shouldPlayPlacementSound = nextBoard.some((value, position) => {
+      if (value === 0) return false;
+      const nowCorrect = value === SOLVED_BOARD[position];
+      const wasCorrect = previousBlocks[position] === SOLVED_BOARD[position];
+      return nowCorrect && !wasCorrect;
     });
+
+    setBlocks(nextBoard);
+
+    if (shouldPlayPlacementSound) {
+      playPlacementSound();
+    }
 
     setMoves((previousMoves) => previousMoves + 1);
   };
