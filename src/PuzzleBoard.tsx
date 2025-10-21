@@ -139,13 +139,6 @@ const PuzzleBoard: FC<PuzzleBoardProps> = ({
               data-correct={isCorrectPosition}
               style={blockStyle}
             >
-              <span
-                aria-hidden="true"
-                className="font-semibold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]"
-                style={{ fontSize: labelFontSize }}
-              >
-                {value}
-              </span>
               <span className="sr-only">Move block {value}</span>
             </button>
           );
