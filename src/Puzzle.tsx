@@ -123,7 +123,7 @@ const Puzzle: React.FC = () => {
         <button
           type="button"
           onClick={shuffleBoard}
-          className="rounded-full border border-transparent bg-[#97fbb4] px-8 py-3 text-sm font-bold text-[#0e0e0e] transition hover:bg-[#3d00ff] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff]"
+          className="rounded-full border border-transparent bg-[#97fbb4] px-8 py-3 text-sm font-bold text-[#0e0e0e] transition hover:bg-black hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff]"
         >
           Shuffle
         </button>
@@ -131,7 +131,7 @@ const Puzzle: React.FC = () => {
           type="button"
           onClick={resetBoard}
           disabled={moves === 0}
-          className="rounded-full border border-white bg-[#0e0e0e] px-8 py-3 text-sm font-bold text-white transition hover:bg-[#3d00ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] hover:border-[#635aff] hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-[#1f1d23] disabled:text-slate-500 disabled:hover:bg-[#1f1d23] disabled:hover:text-slate-500"
+          className="rounded-full border border-white bg-transparent px-8 py-3 text-sm font-bold text-white transition hover:bg-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] hover:border-[#635aff] hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-transparent disabled:text-slate-500 disabled:hover:bg-transparent disabled:hover:text-slate-500"
         >
           Reset
         </button>
