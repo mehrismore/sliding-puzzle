@@ -3,7 +3,7 @@ import {
   GRID_SIZE,
   SOLVED_BOARD,
   BLOCK_GAP,
-  BLOCK_SIZE,
+  DEFAULT_BLOCK_SIZE,
 } from "../puzzleConstants";
 
 export const getNeighborIndices = (index: number) => {
@@ -69,12 +69,15 @@ export const createBlockBackground = (value: number) => {
   };
 };
 
-export const getBlockPosition = (index: number) => {
+export const getBlockPosition = (
+  index: number,
+  blockSize: number = DEFAULT_BLOCK_SIZE
+) => {
   const row = Math.floor(index / GRID_SIZE);
   const col = index % GRID_SIZE;
 
   return {
-    x: col * (BLOCK_SIZE + BLOCK_GAP),
-    y: row * (BLOCK_SIZE + BLOCK_GAP),
+    x: col * (blockSize + BLOCK_GAP),
+    y: row * (blockSize + BLOCK_GAP),
   };
 };
