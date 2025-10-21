@@ -7,7 +7,9 @@ export const SOLVED_BOARD = Array.from({ length: BLOCK_COUNT }, (_, index) =>
 
 export const DOG_IMAGE_URL = "/dog.jpg";
 
-export const BLOCK_SIZE = 72;
 export const BLOCK_GAP = 12;
-
-export const BOARD_SIZE = GRID_SIZE * BLOCK_SIZE + (GRID_SIZE - 1) * BLOCK_GAP;
+export const MIN_BLOCK_SIZE = 68;
+export const DEFAULT_BLOCK_SIZE = 96;
+export const MAX_BLOCK_SIZE = 140;
+export const BOARD_HORIZONTAL_PADDING = 32;
+export const BOARD_MAX_EDGE = 520;
