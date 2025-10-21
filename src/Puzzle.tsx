@@ -1,10 +1,14 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const GRID_SIZE = 3;
 const BLOCK_COUNT = GRID_SIZE * GRID_SIZE;
 const SOLVED_BOARD = Array.from({ length: BLOCK_COUNT }, (_, index) =>
   index === BLOCK_COUNT - 1 ? 0 : index + 1
 );
+const DOG_IMAGE_URL = "/dog.jpg";
+const BLOCK_SIZE = 72;
+const BLOCK_GAP = 12;
+const BOARD_SIZE = GRID_SIZE * BLOCK_SIZE + (GRID_SIZE - 1) * BLOCK_GAP;
 
 const getNeighborIndices = (index: number) => {
   const neighbors: number[] = [];
@@ -33,11 +37,34 @@ const generateShuffledBoard = () => {
   return board;
 };
 
+const createBlockBackground = (value: number) => {
+  if (value === 0) return undefined;
+
+  const solvedIndex = value - 1;
+  const row = Math.floor(solvedIndex / GRID_SIZE);
+  const col = solvedIndex % GRID_SIZE;
+  const denominator = GRID_SIZE - 1;
+
+  const backgroundPositionX =
+    denominator === 0 ? "50%" : `${(col / denominator) * 100}%`;
+  const backgroundPositionY =
+    denominator === 0 ? "50%" : `${(row / denominator) * 100}%`;
+
+  return {
+    backgroundImage: `url(${DOG_IMAGE_URL})`,
+    backgroundSize: `${GRID_SIZE * 100}% ${GRID_SIZE * 100}%`,
+    backgroundPosition: `${backgroundPositionX} ${backgroundPositionY}`,
+    backgroundRepeat: "no-repeat",
+  };
+};
+
 const Puzzle: React.FC = () => {
   const [blocks, setBlocks] = useState<number[]>(() => generateShuffledBoard());
   const [moves, setMoves] = useState(0);
+  const [lastMovedBlock, setLastMovedBlock] = useState<number | null>(null);
   const emptyIndex = blocks.indexOf(0);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const bounceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isSolved = useMemo(
     () => blocks.every((value, index) => value === SOLVED_BOARD[index]),
@@ -106,6 +133,7 @@ const Puzzle: React.FC = () => {
   const handleBlockClick = (index: number) => {
     if (!canSlideBlock(index)) return;
 
+    const movingBlockValue = blocks[index];
     const previousBlocks = blocks;
     const nextBoard = [...previousBlocks];
     const currentEmptyIndex = emptyIndex;
@@ -123,6 +151,14 @@ const Puzzle: React.FC = () => {
     });
 
     setBlocks(nextBoard);
+    setLastMovedBlock(movingBlockValue);
+
+    if (bounceTimeoutRef.current) {
+      clearTimeout(bounceTimeoutRef.current);
+    }
+    bounceTimeoutRef.current = setTimeout(() => {
+      setLastMovedBlock(null);
+    }, 320);
 
     if (shouldPlayPlacementSound) {
       playPlacementSound();
@@ -132,14 +168,42 @@ const Puzzle: React.FC = () => {
   };
 
   const resetBoard = useCallback(() => {
+    if (bounceTimeoutRef.current) {
+      clearTimeout(bounceTimeoutRef.current);
+      bounceTimeoutRef.current = null;
+    }
     setBlocks([...SOLVED_BOARD]);
     setMoves(0);
+    setLastMovedBlock(null);
   }, []);
 
   const shuffleBoard = useCallback(() => {
+    if (bounceTimeoutRef.current) {
+      clearTimeout(bounceTimeoutRef.current);
+      bounceTimeoutRef.current = null;
+    }
     setBlocks(generateShuffledBoard());
     setMoves(0);
+    setLastMovedBlock(null);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (bounceTimeoutRef.current) {
+        clearTimeout(bounceTimeoutRef.current);
+      }
+    },
+    []
+  );
+
+  const getBlockPosition = (index: number) => {
+    const row = Math.floor(index / GRID_SIZE);
+    const col = index % GRID_SIZE;
+    return {
+      x: col * (BLOCK_SIZE + BLOCK_GAP),
+      y: row * (BLOCK_SIZE + BLOCK_GAP),
+    };
+  };
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6">
@@ -157,36 +221,67 @@ const Puzzle: React.FC = () => {
       </header>
 
       <div className="relative">
-        <div className="grid w-64 grid-cols-3 gap-3 rounded-2xl bg-slate-900/60 p-4">
-          {blocks.map((value, index) => {
-            const isEmpty = value === 0;
-            const movable = !isEmpty && canSlideBlock(index);
-            const blockClasses = [
-              "flex aspect-square items-center justify-center rounded-xl text-2xl font-semibold transition-all duration-150",
-              isEmpty
-                ? "bg-transparent"
-                : "bg-gradient-to-br from-slate-200 to-white text-slate-900 shadow-md",
-              movable
-                ? "cursor-pointer hover:-translate-y-1 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400"
-                : "cursor-default",
-              isEmpty ? "pointer-events-none opacity-0" : "",
-            ]
-              .join(" ")
-              .trim();
+        <div className="rounded-2xl bg-slate-900/60 p-4">
+          <div
+            className="relative"
+            style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
+          >
+            {blocks.map((value, index) => {
+              if (value === 0) {
+                return null;
+              }
 
-            return (
-              <button
-                key={isEmpty ? "empty" : value}
-                type="button"
-                aria-label={isEmpty ? "empty block" : `move block ${value}`}
-                onClick={() => handleBlockClick(index)}
-                disabled={!movable}
-                className={blockClasses}
-              >
-                {!isEmpty && <span>{value}</span>}
-              </button>
-            );
-          })}
+              const movable = canSlideBlock(index);
+              const { x, y } = getBlockPosition(index);
+              const isBouncing = lastMovedBlock === value;
+              const isCorrectPosition = value === SOLVED_BOARD[index];
+              const backgroundStyle = createBlockBackground(value);
+              const blockStyle = {
+                width: BLOCK_SIZE,
+                height: BLOCK_SIZE,
+                transform: `translate3d(${x}px, ${y}px, 0) scale(${
+                  isBouncing ? 1.05 : 1
+                })`,
+                transformOrigin: "center",
+                transition:
+                  "transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 220ms ease",
+                willChange: "transform",
+              };
+
+              if (backgroundStyle) {
+                Object.assign(blockStyle, backgroundStyle);
+              }
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-label={`move block ${value}`}
+                  onClick={() => handleBlockClick(index)}
+                  disabled={!movable}
+                  className={[
+                    "block absolute top-0 left-0 flex select-none items-center justify-center overflow-hidden rounded-xl shadow-md ring-1 ring-white/10 transition-[background-color,box-shadow,filter,opacity] duration-200",
+                    movable
+                      ? "cursor-pointer hover:shadow-xl hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400"
+                      : "cursor-default opacity-70",
+                    isBouncing ? "shadow-xl" : "",
+                  ]
+                    .join(" ")
+                    .trim()}
+                  data-correct={isCorrectPosition}
+                  style={blockStyle}
+                >
+                  <span
+                    aria-hidden="true"
+                    className="text-xl font-semibold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]"
+                  >
+                    {value}
+                  </span>
+                  <span className="sr-only">Move block {value}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {isSolved && moves > 0 && (
@@ -202,7 +297,7 @@ const Puzzle: React.FC = () => {
         <button
           type="button"
           onClick={shuffleBoard}
-          className="rounded-full bg-purple-500 px-6 py-2 text-sm font-semibold text-purple-950 transition hover:bg-sky-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
+          className="rounded-full bg-[#97fbb4] px-6 text-sm font-medium hover:bg-[#3d00ff]"
         >
           Shuffle
         </button>
@@ -210,7 +305,7 @@ const Puzzle: React.FC = () => {
           type="button"
           onClick={resetBoard}
           disabled={isSolved}
-          className="rounded-full border border-slate-700 px-6 py-2 text-sm font-semibold transition text-pink-400 hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
+          className="rounded-full bg-[#0e0e0e] border-white px-6 text-sm font-medium text-white hover:bg-[#3d00ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
         >
           Reset
         </button>

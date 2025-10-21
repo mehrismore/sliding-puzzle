@@ -8,6 +8,41 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased font-sans;
+    background-color: #141317;
+    @apply text-slate-100 antialiased font-sans;
+  }
+}
+
+@layer components {
+.block {
+    position: relative;
+  }
+
+.block::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.6);
+    opacity: 0.4;
+    transition: opacity 200ms ease, background-color 200ms ease;
+    pointer-events: none;
+  }
+
+.block[data-correct="true"]::after {
+    background-color: rgba(255, 255, 255, 0.7);
+    opacity: 0.18;
+  }
+
+.block[data-correct="false"]::after {
+    background-color: rgba(15, 23, 42, 0.75);
+    opacity: 0.45;
+  }
+
+.block[data-correct="true"]:hover:not(:disabled)::after {
+    opacity: 0.12;
+  }
+
+.block[data-correct="false"]:hover:not(:disabled)::after {
+    opacity: 0.3;
   }
 }
