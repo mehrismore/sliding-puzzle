@@ -8,17 +8,18 @@
 
 @layer base {
   body {
-    background-color: #141317;
+    background-color: #0e0e0e;
     @apply text-slate-100 antialiased font-sans;
   }
 }
 
 @layer components {
-.block {
+  /* Put a gentle, see-through blanket on top of every tile so we can tint it light when it's correct or darker when it's not. */
+  .block {
     position: relative;
   }
 
-.block::after {
+  .block::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -28,21 +29,21 @@
     pointer-events: none;
   }
 
-.block[data-correct="true"]::after {
+  .block[data-correct="true"]::after {
     background-color: rgba(255, 255, 255, 0.7);
     opacity: 0.18;
   }
 
-.block[data-correct="false"]::after {
+  .block[data-correct="false"]::after {
     background-color: rgba(15, 23, 42, 0.75);
     opacity: 0.45;
   }
 
-.block[data-correct="true"]:hover:not(:disabled)::after {
+  .block[data-correct="true"]:hover:not(:disabled)::after {
     opacity: 0.12;
   }
 
-.block[data-correct="false"]:hover:not(:disabled)::after {
+  .block[data-correct="false"]:hover:not(:disabled)::after {
     opacity: 0.3;
   }
 }
