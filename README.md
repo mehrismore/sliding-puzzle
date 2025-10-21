@@ -11,7 +11,7 @@
 
 4. Start the development server:
    `npm run dev`
- the app will start on http://localhost:5173
+ , the app will start on http://localhost:5173
 
 --------------------
 
