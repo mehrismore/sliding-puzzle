@@ -22,6 +22,36 @@ export const getNeighborIndices = (index: number) => {
 export const canSlideBlock = (emptyIndex: number, targetIndex: number) =>
   getNeighborIndices(emptyIndex).includes(targetIndex);
 
+const countInversions = (board: number[]) => {
+  const blocks = board.filter((value) => value !== 0);
+  let inversions = 0;
+
+  for (let i = 0; i < blocks.length - 1; i += 1) {
+    for (let j = i + 1; j < blocks.length; j += 1) {
+      if (blocks[i] > blocks[j]) {
+        inversions += 1;
+      }
+    }
+  }
+
+  return inversions;
+};
+
+export const isSolvableBoard = (board: number[]) => {
+  const inversions = countInversions(board);
+
+  if (GRID_SIZE % 2 !== 0) {
+    return inversions % 2 === 0;
+  }
+
+  const emptyRowIndex = Math.floor(board.indexOf(0) / GRID_SIZE);
+  const emptyRowFromBottom = GRID_SIZE - emptyRowIndex;
+
+  return emptyRowFromBottom % 2 === 0
+    ? inversions % 2 !== 0
+    : inversions % 2 === 0;
+};
+
 export const generateShuffledBoard = (): number[] => {
   const board = [...SOLVED_BOARD];
 
@@ -38,7 +68,7 @@ export const generateShuffledBoard = (): number[] => {
 
   const solved = board.every((value, index) => value === SOLVED_BOARD[index]);
 
-  if (solved) {
+  if (solved || !isSolvableBoard(board)) {
     return generateShuffledBoard();
   }
 
