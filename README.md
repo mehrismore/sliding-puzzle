@@ -1,9 +1,10 @@
 Requested by [FreeDay](https://www.freeday.ai/), written by @mehrismore
 
-# Sliding Puzzle !
- A mobile-first Sliding Puzzle. 
- <img width="335" height="726" alt="Screenshot 2025-10-21 at 17 57 48" src="https://github.com/user-attachments/assets/8cbad87c-f1a6-4596-a34e-93da1755c525" />
- 
+# Sliding Puzzle 
+A mobile-first Sliding Puzzle. 
+
+<img width="331" height="719" alt="Screenshot 2025-10-21 at 22 49 28" src="https://github.com/user-attachments/assets/40aeaebd-9ba4-415d-9779-0c60d6ab3c64" />
+
 ## 🧩 Installation & Setup
 1. Clone the repository
    `git clone https://github.com/<your-username>/sliding-puzzle.git`
