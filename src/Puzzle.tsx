@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ConfettiOverlay from "./ConfettiOverlay";
 
 const GRID_SIZE = 3;
 const BLOCK_COUNT = GRID_SIZE * GRID_SIZE;
@@ -284,13 +285,7 @@ const Puzzle: React.FC = () => {
           </div>
         </div>
 
-        {isSolved && moves > 0 && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-3xl bg-sky-500/10 ring-2 ring-sky-400/80 ring-offset-4 ring-offset-slate-900/70">
-            <p className="text-lg font-medium text-sky-200">
-              Solved in {moves} moves!
-            </p>
-          </div>
-        )}
+        <ConfettiOverlay show={isSolved && moves > 0} moves={moves} />
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
