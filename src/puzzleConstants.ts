@@ -5,7 +5,7 @@ export const SOLVED_BOARD = Array.from({ length: BLOCK_COUNT }, (_, index) =>
   index === BLOCK_COUNT - 1 ? 0 : index + 1
 );
 
-export const DOG_IMAGE_URL = "/dog.jpg";
+export const IMAGE_URL = "/dog.jpg";
 
 export const BLOCK_GAP = 12;
 export const MIN_BLOCK_SIZE = 68;
