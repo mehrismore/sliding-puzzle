@@ -1,3 +1,9 @@
+/* Todos:
+- clean up this file; separate big functions into separate files
+- make the image reusable
+- think of efficiency
+- think of better aesthetics */
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ConfettiOverlay from "./ConfettiOverlay";
 
@@ -11,6 +17,7 @@ const BLOCK_SIZE = 72;
 const BLOCK_GAP = 12;
 const BOARD_SIZE = GRID_SIZE * BLOCK_SIZE + (GRID_SIZE - 1) * BLOCK_GAP;
 
+// Find the neighbors directly above, below, left, and right of this index.
 const getNeighborIndices = (index: number) => {
   const neighbors: number[] = [];
   const row = Math.floor(index / GRID_SIZE);
@@ -24,6 +31,7 @@ const getNeighborIndices = (index: number) => {
   return neighbors;
 };
 
+// Mix up the grid with random valid moves; if it ends up solved, shuffle again.
 const generateShuffledBoard = () => {
   const board = [...SOLVED_BOARD];
   for (let iteration = 0; iteration < 200; iteration += 1) {
@@ -35,9 +43,14 @@ const generateShuffledBoard = () => {
       board[emptyIndex],
     ];
   }
+  const solved = board.every((value, index) => value === SOLVED_BOARD[index]);
+  if (solved) {
+    return generateShuffledBoard();
+  }
   return board;
 };
 
+// Give each block the slice of the picture it should display.
 const createBlockBackground = (value: number) => {
   if (value === 0) return undefined;
 
@@ -60,7 +73,10 @@ const createBlockBackground = (value: number) => {
 };
 
 const Puzzle: React.FC = () => {
-  const [blocks, setBlocks] = useState<number[]>(() => generateShuffledBoard());
+  const [initialBlocks, setInitialBlocks] = useState<number[]>(() =>
+    generateShuffledBoard()
+  );
+  const [blocks, setBlocks] = useState<number[]>(initialBlocks);
   const [moves, setMoves] = useState(0);
   const [lastMovedBlock, setLastMovedBlock] = useState<number | null>(null);
   const emptyIndex = blocks.indexOf(0);
@@ -72,6 +88,7 @@ const Puzzle: React.FC = () => {
     [blocks]
   );
 
+  // Play a quick "ding" every time a block locks into its right spot.
   const playPlacementSound = useCallback(() => {
     if (typeof window === "undefined") return;
 
@@ -131,6 +148,7 @@ const Puzzle: React.FC = () => {
   const canSlideBlock = (index: number) =>
     getNeighborIndices(emptyIndex).includes(index);
 
+  // When a block is tapped, slide it into the gap and count the move.
   const handleBlockClick = (index: number) => {
     if (!canSlideBlock(index)) return;
 
@@ -168,22 +186,26 @@ const Puzzle: React.FC = () => {
     setMoves((previousMoves) => previousMoves + 1);
   };
 
+  // Put everything back to the current shuffle and reset the move count.
   const resetBoard = useCallback(() => {
     if (bounceTimeoutRef.current) {
       clearTimeout(bounceTimeoutRef.current);
       bounceTimeoutRef.current = null;
     }
-    setBlocks([...SOLVED_BOARD]);
+    setBlocks([...initialBlocks]);
     setMoves(0);
     setLastMovedBlock(null);
-  }, []);
+  }, [initialBlocks]);
 
+  // Create a fresh scramble and remember it so reset can bring it back.
   const shuffleBoard = useCallback(() => {
     if (bounceTimeoutRef.current) {
       clearTimeout(bounceTimeoutRef.current);
       bounceTimeoutRef.current = null;
     }
-    setBlocks(generateShuffledBoard());
+    const newBoard = generateShuffledBoard();
+    setInitialBlocks(newBoard);
+    setBlocks(newBoard);
     setMoves(0);
     setLastMovedBlock(null);
   }, []);
@@ -217,12 +239,13 @@ const Puzzle: React.FC = () => {
         </h1>
         <p className="mt-3 text-sm text-purple-300 sm:text-base">
           Slide blocks into place to restore the ordered grid. Adjacent blocks
-          swap with the empty space. Can you solve it in the fewest moves?
+          swap with the empty space. Let's see if you solve it in the fewest
+          moves! :D
         </p>
       </header>
 
       <div className="relative">
-        <div className="rounded-2xl bg-slate-900/60 p-4">
+        <div className="rounded-2xl bg-slate-900/60 border border-[#b199ff] p-4">
           <div
             className="relative"
             style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
@@ -292,15 +315,15 @@ const Puzzle: React.FC = () => {
         <button
           type="button"
           onClick={shuffleBoard}
-          className="rounded-full bg-[#97fbb4] px-6 text-sm font-medium hover:bg-[#3d00ff]"
+          className="rounded-full border border-transparent bg-[#97fbb4] px-8 py-3 text-sm font-bold text-[#0e0e0e] transition hover:bg-[#3d00ff] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff]"
         >
           Shuffle
         </button>
         <button
           type="button"
           onClick={resetBoard}
-          disabled={isSolved}
-          className="rounded-full bg-[#0e0e0e] border-white px-6 text-sm font-medium text-white hover:bg-[#3d00ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
+          disabled={moves === 0}
+          className="rounded-full border border-white bg-[#0e0e0e] px-8 py-3 text-sm font-bold text-white transition hover:bg-[#3d00ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] hover:border-[#635aff] hover:text-white disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-[#1f1d23] disabled:text-slate-500 disabled:hover:bg-[#1f1d23] disabled:hover:text-slate-500"
         >
           Reset
         </button>
