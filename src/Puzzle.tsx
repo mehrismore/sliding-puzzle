@@ -96,7 +96,7 @@ const Puzzle: React.FC = () => {
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-6">
       <header className="text-center">
-        <p className="text-sm uppercase tracking-[0.35em] text-slate-400">
+        <p className="text-sm uppercase tracking-[0.35em] text-white">
           FreeDay AI presents!
         </p>
         <h1 className="mt-2 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
