@@ -1,5 +1,5 @@
 import {
-  DOG_IMAGE_URL,
+  IMAGE_URL,
   GRID_SIZE,
   SOLVED_BOARD,
   BLOCK_GAP,
@@ -92,7 +92,7 @@ export const createBlockBackground = (value: number) => {
     denominator === 0 ? "50%" : `${(row / denominator) * 100}%`;
 
   return {
-    backgroundImage: `url(${DOG_IMAGE_URL})`,
+    backgroundImage: `url(${IMAGE_URL})`,
     backgroundSize: `${GRID_SIZE * 100}% ${GRID_SIZE * 100}%`,
     backgroundPosition: `${backgroundPositionX} ${backgroundPositionY}`,
     backgroundRepeat: "no-repeat",

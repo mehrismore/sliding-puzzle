@@ -85,8 +85,10 @@ const PuzzleBoard: FC<PuzzleBoardProps> = ({
   return (
     <div
       ref={containerRef}
-      className="w-full rounded-2xl bg-slate-900/60 p-4"
-      style={{ maxWidth: "min(92vw, 520px)" }}
+      className="flex w-full items-center justify-center p-4 sm:rounded-xl"
+      style={{
+        maxWidth: "min(92vw, 520px)",
+      }}
     >
       <div
         className="relative"
