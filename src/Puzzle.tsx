@@ -6,9 +6,9 @@ const SOLVED_BOARD = Array.from({ length: BLOCK_COUNT }, (_, index) =>
   index === BLOCK_COUNT - 1 ? 0 : index + 1
 );
 const DOG_IMAGE_URL = "/dog.jpg";
-const TILE_SIZE = 72;
-const TILE_GAP = 12;
-const BOARD_SIZE = GRID_SIZE * TILE_SIZE + (GRID_SIZE - 1) * TILE_GAP;
+const BLOCK_SIZE = 72;
+const BLOCK_GAP = 12;
+const BOARD_SIZE = GRID_SIZE * BLOCK_SIZE + (GRID_SIZE - 1) * BLOCK_GAP;
 
 const getNeighborIndices = (index: number) => {
   const neighbors: number[] = [];
@@ -200,8 +200,8 @@ const Puzzle: React.FC = () => {
     const row = Math.floor(index / GRID_SIZE);
     const col = index % GRID_SIZE;
     return {
-      x: col * (TILE_SIZE + TILE_GAP),
-      y: row * (TILE_SIZE + TILE_GAP),
+      x: col * (BLOCK_SIZE + BLOCK_GAP),
+      y: row * (BLOCK_SIZE + BLOCK_GAP),
     };
   };
 
@@ -237,8 +237,8 @@ const Puzzle: React.FC = () => {
               const isCorrectPosition = value === SOLVED_BOARD[index];
               const backgroundStyle = createBlockBackground(value);
               const blockStyle = {
-                width: TILE_SIZE,
-                height: TILE_SIZE,
+                width: BLOCK_SIZE,
+                height: BLOCK_SIZE,
                 transform: `translate3d(${x}px, ${y}px, 0) scale(${
                   isBouncing ? 1.05 : 1
                 })`,
@@ -260,9 +260,9 @@ const Puzzle: React.FC = () => {
                   onClick={() => handleBlockClick(index)}
                   disabled={!movable}
                   className={[
-                    "block absolute top-0 left-0 flex select-none items-center justify-center overflow-hidden rounded-xl shadow-md ring-1 ring-white/10 transition-[background-color,box-shadow,filter] duration-200",
+                    "block absolute top-0 left-0 flex select-none items-center justify-center overflow-hidden rounded-xl shadow-md ring-1 ring-white/10 transition-[background-color,box-shadow,filter,opacity] duration-200",
                     movable
-                      ? "cursor-pointer hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400"
+                      ? "cursor-pointer hover:shadow-xl hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sky-400"
                       : "cursor-default opacity-70",
                     isBouncing ? "shadow-xl" : "",
                   ]
@@ -297,7 +297,7 @@ const Puzzle: React.FC = () => {
         <button
           type="button"
           onClick={shuffleBoard}
-          className="rounded-full bg-purple-500 px-6 py-2 text-sm font-semibold text-purple-950 transition hover:bg-sky-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-200"
+          className="rounded-full bg-[#97fbb4] px-6 text-sm font-medium hover:bg-[#3d00ff]"
         >
           Shuffle
         </button>
@@ -305,7 +305,7 @@ const Puzzle: React.FC = () => {
           type="button"
           onClick={resetBoard}
           disabled={isSolved}
-          className="rounded-full border border-slate-700 px-6 py-2 text-sm font-semibold transition text-pink-400 hover:border-slate-500 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200 disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
+          className="rounded-full bg-[#0e0e0e] border-white px-6 text-sm font-medium text-white hover:bg-[#3d00ff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#635aff] disabled:cursor-not-allowed disabled:border-slate-800 disabled:text-slate-500"
         >
           Reset
         </button>
